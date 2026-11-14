@@ -1,0 +1,78 @@
+# AgriDoc AI — data configuration.
+# All hyperparameters live here; nothing is hardcoded in code.
+
+# --- Dataset
+data_root: data/plantvillage/color # Crop___Disease class folders
+image_size: 224 # EfficientNet-B0 native resolution
+image_channels: 3
+
+# --- Splits
+# Per-class split. Group-by-source is only possible where a class has many
+# distinct sources; PlantVillage has 185 canonical sources but 28 of 38
+# classes have exactly ONE, so whole-source partitioning is the exception,
+# not the rule. The atomic unit is therefore:
+#   - a whole source tag, when the class has >= 4 sources
+#   - an imagehash near-duplicate group (phash 8x8, hamming <= 5), otherwise
+# Near-duplicates are the same leaf photographed twice; splitting them across
+# train/val inflates accuracy exactly like a random split would.
+train_ratio: 0.70
+val_ratio: 0.15
+test_ratio: 0.15
+seed: 42
+# Classes whose atomic groups are imagehash groups (few sources) are reported
+# as lab-optimistic: their val/test accuracy is an upper bound, not a
+# field-accuracy estimate.
+lab_optimistic_threshold_sources: 4
+# Perceptual-hash grouping parameters (imagehash phash, 8x8).
+phash_size: 8
+phash_hamming_threshold: 5
+# Where the manifest of split assignments lives (deterministic, reproducible).
+splits_dir: data/splits
+train_manifest: data/splits/train.json
+val_manifest: data/splits/val.json
+test_manifest: data/splits/test.json
+# Per-image split assignment + grouping metadata, for the leakage assertion.
+splits_csv: data/splits/splits.csv
+
+# --- Class mapping
+# Folder name -> stable integer label. Written to data/splits/classes.json so
+# the model, ONNX runtime and the API all agree on the same ordering.
+classes_manifest: data/splits/classes.json
+
+# --- Uncertainty / out-of-domain
+# Softmax probability below this is reported as "uncertain" rather than a guess.
+confidence_floor: 0.70
+# Top-K predictions returned in the API response.
+top_k: 3
+
+# --- Augmentation (train only)
+augmentation:
+  # Random horizontal/vertical flip + rotation handles camera angle variation.
+  hflip_p: 0.5
+  vflip_p: 0.2
+  rotation_degrees: 25
+  # Lighting/blur/colour jitter simulates real-world farmer photos: muddy,
+  # backlit, slightly out of focus, taken on a phone camera.
+  brightness_jitter: 0.25
+  contrast_jitter: 0.25
+  saturation_jitter: 0.25
+  hue_jitter: 0.05
+  blur_kernel_range: [3, 7] # Gaussian blur radius, sampled uniformly
+  blur_p: 0.25
+  # Random affine crops + resize to image_size.
+  scale_range: [0.75, 1.0]
+  aspect_range: [0.85, 1.15]
+  # Occasional cutout so the model cannot rely on a single background pixel.
+  cutout_p: 0.10
+  cutout_size: 0.15 # fraction of the image
+
+# --- Normalisation
+# ImageNet stats (EfficientNet pretrained weights).
+imagenet_mean: [0.485, 0.456, 0.406]
+imagenet_std: [0.229, 0.224, 0.225]
+
+# --- Data loading
+num_workers: 0  # Windows Shared-Mem workers crash with Dataset.set_data() (collate error). Set 0 for main-process loading.
+batch_size: 8
+# Drop the last partial batch so BN stats stay stable.
+drop_last: true

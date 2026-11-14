@@ -1,0 +1,16 @@
+AgriDoc AI — Test Set Evaluation
+==================================================
+Model: efficientnet_b0 (Best checkpoint)
+Classes: 38
+Test samples: 8144
+
+Top-1 accuracy:  0.9856 (98.56%)
+Top-3 accuracy:  0.9995 (99.95%)
+Macro Precision: 0.9718
+Macro Recall:    0.9851
+Macro F1:        0.9772
+ECE:             0.1424
+
+Confidence floor: 70%
+Confident samples: 83.8%
+Confident accuracy: 0.9936

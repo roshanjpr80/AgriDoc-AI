@@ -1,0 +1,25 @@
+# AgriDoc AI — offline sync configuration.
+
+# Queue file (SQLite-compatible JSONL) where pending predictions are stored
+# until a network connection allows upload to the central server.
+queue_dir: data/offline/queue
+queue_path: data/offline/queue.jsonl
+
+# Maximum number of queued predictions kept before the oldest are purged.
+max_queue_size: 200
+queue_max_size: 200
+max_retries: 3
+
+# How long (hours) a queued item is retained before purging.
+# 72h covers two days of no connectivity; anything older is a stale diagnosis
+# that should not be re-uploaded.
+queue_ttl_hours: 72
+
+# Compressed image format for low-bandwidth uploads.
+compression_format: jpeg
+compression_quality: 60
+
+# Sync server. In fully-offline mode this is ignored; a sync button
+# still appears in the UI so the farmer can trigger manually when
+# connectivity returns.
+server_url: ""  # set to your backend URL; empty = manual-only sync

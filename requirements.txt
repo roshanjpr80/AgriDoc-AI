@@ -1,0 +1,72 @@
+# AgriDoc AI — Python Dependencies
+# Install:  pip install -r requirements.txt
+# Python:   3.14 (verified). 3.11 is too old: pydantic-settings 2.16 and onnxruntime 1.31 require Python 3.12+.
+#
+# THIS FILE IS THE SOURCE OF TRUTH for project dependencies.
+# Every package listed is imported by code in this repo.
+#
+# RUNTIME PROFILES:
+#   src/api/app.py     — PRODUCTION API (12 endpoints). CPU-only, ONNX, no PyTorch.
+#   backend/main.py    — minimal entrypoint (/health, /ready).
+#   scripts/           — training, export, evaluation, dataset tooling.
+
+# 1. PRODUCTION API (CPU-only, ONNX Runtime)
+# What public users hit:
+#   uvicorn src.api.app:app --host 0.0.0.0 --port 9998
+#
+# Dependencies imported by src/api/app.py:
+fastapi==0.162.0               # HTTP API: /predict, /advice, /rag, /agripulse, etc.
+uvicorn==0.54.0                # ASGI server
+python-multipart==0.0.32       # FastAPI needs this for UploadFile form uploads
+pydantic==2.14.1               # request/response schemas
+onnxruntime==1.31.0            # production inference engine (EfficientNet-B0 ONNX)
+numpy==2.5.4                   # tensor<->numpy, softmax, Grad-CAM
+pillow==13.0.0                 # image decode/encode, Grad-CAM overlay
+pyyaml==6.0.3                  # configs/__init__.py loads train.yaml, data.yaml
+httpx==0.28.1                  # async HTTP client for weather/market APIs
+httpx-sse==0.4.3               # SSE streaming for the AgriPulse workflow
+pyttsx3==2.99                  # offline TTS fallback (sr/advice/tts.py)
+argon2-cffi==25.1.0            # password hashing for security
+cryptography==50.0.2           # Fernet encryption of stored data
+
+# Database layer (imported by src/api/app.py via backend):
+sqlalchemy==2.1.6              # database ORM
+pydantic-settings==2.16.1      # typed settings from env vars
+
+# 2. AGENT ORCHESTRATION (LangGraph 5-agent workflow)
+# Imported by src/agents/graph.py, src/agents/advice_agent.py
+# Fallback runner exists if langgraph is unavailable
+langgraph==1.2.17
+langgraph-checkpoint==4.3.0
+langgraph-prebuilt==1.1.1
+
+# 3. CV / ML TRAINING AND EXPORT (Only for model development)
+# PyTorch is ~2GB. Only needed for:
+#   - scripts/export_onnx.py   (torch.onnx.export)
+#   - scripts/evaluate.py      (metrics, calibration)
+#   - backend/models/cv_model.py (imported by backend/main.py for training)
+# The production API path does NOT import torch.
+torch==2.11.0
+torchvision==0.26.0
+onnx==1.23.2                   # ONNX graph API (export)
+onnxscript==0.7.2              # torch.onnx.export dependency
+scipy==1.18.1                  # scipy.fft.dct in perceptual hashing (src/vision/phash.py)
+scikit-learn==1.9.1            # stratified splits, class weights, calibration
+
+# 4. TESTING
+pytest==9.1.1
+# Test with: python -m pytest tests/ -q
+
+# 5. OPTIONAL: STREAMLIT (Legacy - not used in current deployment)
+# Kept for backwards compatibility. Frontend now uses React/Vite on port 3000.
+streamlit                  # pip install -r requirements.txt && streamlit run app.py
+
+# DEVELOPMENT TIPS
+# Quick start backend:
+#   uvicorn src.api.app:app --reload --port 9998
+#
+# Quick start frontend:
+#   cd frontend && npm run dev
+#
+# Run tests:
+#   python -m pytest tests/ -v

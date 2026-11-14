@@ -1,0 +1,55 @@
+# AgriDoc AI — training configuration.
+# Backbone, optimizer and schedule. Nothing here is hardcoded in src/models/.
+
+# --- Model
+backbone: efficientnet_b0 # EfficientNet-B0, ImageNet pretrained
+pretrained: true # download ImageNet weights on first run
+num_classes: 38 # derived from data/splits/classes.json
+dropout: 0.35 # classifier head dropout (regularisation)
+# Whether to unfreeze the backbone after the warmup epoch.
+finetune_backbone: true
+# Number of epochs with the backbone frozen before unfreezing.
+freeze_epochs: 1
+
+# --- Optimiser
+optimizer: adamw
+learning_rate: 0.0003 # backbone frozen phase
+backbone_lr: 0.0001 # lower LR once the backbone is unfrozen
+weight_decay: 0.0001
+# One-cycle schedule: LR ramps up over warmup, then decays cosine to zero.
+warmup_epochs: 2
+scheduler: cosine
+min_lr: 0.000001
+
+# --- Loss
+# Class-imbalance aware. Per-class weights are inverse-frequency, computed in
+# src/data/balance.py and passed in at training time. The sampler also balances
+# the effective batch so rare classes are seen often.
+loss: cross_entropy
+class_weighting: inverse_frequency
+label_smoothing: 0.05
+
+# --- Training loop
+epochs: 30
+batch_size: 8
+gradient_accumulation_steps: 2
+# Gradient clipping stops exploding updates on the unfreezing phase.
+grad_clip_norm: 5.0
+seed: 42
+# Save a checkpoint whenever validation macro-F1 improves.
+save_best_metric: val_macro_f1
+# Stop early when the best metric stops improving.
+early_stopping_patience: 5
+
+# --- Hardware
+device: cuda # cuda / cpu
+mixed_precision: true # AMP for faster training on the same GPU
+num_workers: 0  # 0 = main-process loading (Windows: shared-mem DataLoader workers crash)
+
+# --- Output
+checkpoint_dir: models/checkpoints
+best_checkpoint: models/checkpoints/best.pt
+final_checkpoint: models/checkpoints/final.pt
+# Where the training report (metrics, confusion matrix, calibration) goes.
+report_dir: reports
+onnx_dir: models/artifacts

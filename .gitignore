@@ -1,0 +1,223 @@
+# AgriDoc AI - Git Ignore File
+# Generated: 2026-11-14
+
+
+
+# Python - Core
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+
+# Virtual Environments
+
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+agridoc-venv/
+.venv/
+venv-scripts/
+
+
+# Environment Files (CRITICAL: Never commit secrets!)
+
+.env
+.env.local
+.env.*.local
+*.env
+.env.production
+.env.development
+.env.test
+
+
+# IDE / Editor
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
+
+
+# OS Generated Files
+
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+
+# Python Testing & Coverage
+
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+.hypothesis/
+coverage.xml
+*.cover
+*.log
+logs/
+
+
+# Type Checking
+
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+
+# Jupyter Notebooks
+
+.ipynb_checkpoints/
+*.ipynb
+
+
+# Database Files
+
+*.db
+*.sqlite
+*.sqlite3
+
+
+# Model Artifacts (CRITICAL: Large binary files)
+
+models/artifacts/*.onnx
+models/artifacts/*.json
+models/artifacts/*.onnx.json
+models/artifacts/metadata.json
+models/checkpoints/*.pt
+
+
+# Dataset Files (NOT for Git - Large files)
+
+data/plantvillage/
+data/offline/
+data/splits/**/*.json
+data/knowledge/*.json
+data/knowledge/*.yaml
+
+
+# Frontend Build Artifacts
+
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/*.local
+frontend/coverage/
+frontend/.parcel-cache/
+frontend/.vite-ssg/
+frontend/public/pwa-*.png
+
+
+# Frontend Configuration
+
+frontend/.env
+frontend/.env.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+.pnpm-store/
+
+
+# Playwright / Browser Automation
+
+.playwright-mcp/
+*.trace.zip
+
+
+# Claude / AI Tools
+
+.claude/
+.claude-code/
+.claude/knowledge_base/
+.claide/
+
+
+# Temporary Files
+
+*.tmp
+*.temp
+tmp/
+temp/
+.TemporaryUploads/
+
+
+# Docker (not used for development per project rules)
+
+.docker/
+.dockerignore
+docker-compose.override.yml
+.docker-compose.*
+
+
+# Deployment Scripts Output
+
+*.sh
+!.gitignore
+# Keep deploy scripts themselves, ignore outputs
+outputs/
+deploy-result.json
+node_modules/
+
+
+# Node.js Specific (if any)
+
+.npm/
+.npmrc
+.node-gyp/
+.atom/
+.bash_history
+.env
+.env.*
+.npm
+.cache/
+
+
+# Security Notes
+
+# NEVER commit:
+# - .env files (contains API keys, DB keys)
+# - Model files (610KB ONNX - too large, use LFS or external storage)
+# - Dataset images (~38K color images)
+# - Production keys
+#
+# For large files, consider:
+# - Git LFS: git lfs track "*.onnx"
+# - External storage: models/artifacts/ from shared drive

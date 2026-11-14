@@ -1,0 +1,53 @@
+# AgriDoc AI — advisory configuration.
+# The knowledge base is the ONLY source the engine may cite. LLMs may rephrase
+# it, never invent doses or treatments.
+
+knowledge_json: data/knowledge/advisory_rules.json
+translations_json: data/knowledge/translations.json
+
+# Languages the advice can be rendered in (ISO 639-1). English is the source
+# of truth; the rest are pre-translated offline files (see translations.json).
+languages: [en, hi, bn, ta, te, mr, gu, ml, kn, pa]
+
+# Safety thresholds. Any chemical whose re-entry / pre-harvest interval is not
+# stated in the KB is flagged "verify with an agriculture officer".
+min_confidence_for_advice: 0.70
+
+# RAG: top-K KB chunks retrieved for a free-text query.
+rag_top_k: 5
+
+# ONNX runtime artifacts (written by scripts/export_onnx.py).
+onnx_model: models/artifacts/agridoc_cv.onnx
+onnx_labels: models/artifacts/agridoc_cv.onnx.json
+
+# Model configuration (must match configs/train.yaml backbone and exported ONNX)
+backbone: "efficientnet_b0"
+image_size: 224
+confidence_floor: 0.70
+top_k: 3
+
+# Supported crops
+supported_crops:
+  - "Apple"
+  - "Blueberry"
+  - "Cherry"
+  - "Corn"
+  - "Grape"
+  - "Orange"
+  - "Peach"
+  - "Pepper"
+  - "Potato"
+  - "Raspberry"
+  - "Soybean"
+  - "Squash"
+  - "Strawberry"
+  - "Tomato"
+
+# RAG configuration
+max_query_length: 200
+min_query_length: 3
+default_language: "en"
+
+# Fallback configuration
+fallback_language: "en"
+fallback_advice: "Please consult with an agricultural expert for specific guidance."
