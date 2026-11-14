@@ -16,7 +16,94 @@
 
 ---
 
-## Option 1: Oracle Cloud Always Free (Recommended)
+## Option 1: Vercel (Recommended for Static Frontend)
+
+**Zero-config deployment with global CDN, automatic HTTPS, and serverless functions.**
+
+### Step 1: Install Vercel CLI
+
+```bash
+npm install -g vercel
+```
+
+### Step 2: Generate Production Secrets
+
+```bash
+# Generate API key and Fernet key
+python -c "import secrets; from cryptography.fernet import Fernet; print(f'API_KEY=agridoc-{secrets.token_urlsafe(32)}'); print(f'DB_KEY={Fernet.generate_key().decode()}')"
+```
+
+Example output:
+```
+API_KEY=agridoc-YourSecureKeyHere12345
+DB_KEY=HV7QA-zwSehXoQqbxjfHwIRSnSjIE410YourKeyHere12345
+```
+
+### Step 3: Deploy Frontend (Static Site)
+
+```bash
+cd D:/agridoc/frontend
+npm install
+npm run build
+cd ..
+vercel
+```
+
+During Vercel setup:
+
+1. **Project name**: `agridoc-frontend`
+2. **Framework**: Select `React` (auto-detected) or `Other`
+3. **Output Directory**: `frontend/dist`
+4. **Link to existing project**: No (creates new)
+
+### Step 4: Set Environment Variables on Vercel
+
+**Dashboard → Your Project → Settings → Environment Variables**
+
+| Name | Value | Environment |
+|------|-------|-------------|
+| `VITE_BACKEND_URL` | `https://your-api.vercel.app/api` | Production |
+| `AGRIDOC_API_KEYS` | `agridoc-YourKeyHere` | Production |
+| `AGRIDOC_DB_KEYS` | `YourFernetKey` | Production |
+| `CORS_ALLOWED_ORIGINS` | `https://your-vercel-frontend.vercel.app` | Production |
+
+### Step 5: Deploy Backend (API Routes)
+
+**Option A: Single Vercel Project (Frontend + Backend)**
+
+Create `api/index.py` in project root:
+```python
+import sys
+sys.path.insert(0, '/var/task/src')
+from api.app import app
+```
+
+**Option B: Separate Backend Project**
+
+```bash
+cd D:/agridoc
+vercel
+```
+
+During setup:
+1. **Project name**: `agridoc-api`
+2. **Root Directory**: `./src/api`
+3. **Build Command**: (leave empty - no build needed)
+4. **Output Directory**: (leave empty)
+
+### Step 6: Test Your Deployment
+
+```bash
+# Test frontend (should show AgriDoc UI)
+curl -I https://your-vercel-frontend.vercel.app
+
+# Test backend health
+curl https://your-api.vercel.app/api/health
+```
+
+---
+
+## Option 2: Zero-Docker Manual Deployment (No Docker)
 
 **Get a free VM that never expires:**
 - 2 VM instances × 1GB RAM
@@ -175,18 +262,37 @@ sudo rm /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl restart nginx
 ```
 
-### Step 9: Deploy Frontend to Netlify
+### Step 9: Deploy Frontend to Vercel (Static Site)
+
 ```bash
-# On your local machine
-cd frontend
+# Install Vercel CLI
+npm install -g vercel
+
+# Build frontend
+cd ../frontend
 npm install
 npm run build
+cd ..
 
-# Upload entire dist/ folder to https://app.netlify.com/drop
-# Or use Netlify CLI:
-npm install -g netlify-cli
-netlify deploy --dir=dist --prod --site=your-site-name
+# Deploy
+vercel
 ```
+
+During Vercel setup, select:
+- Template: **Other** or **React** (auto-detected)
+- Root Directory: Leave empty (uses repo root)
+- Output Directory: `frontend/dist`
+- Build Command: `cd frontend && npm install && npm run build`
+
+**Set environment variables in Vercel Dashboard:**
+| Name | Value |
+|------|-------|
+| `VITE_BACKEND_URL` | `https://your-api.vercel.app/api` |
+| `AGRIDOC_API_KEYS` | `agridoc-your-production-key` |
+| `AGRIDOC_DB_KEYS` | `YourFernetKey` |
+| `CORS_ALLOWED_ORIGINS` | `https://your-frontend.vercel.app` |
+
+---
 
 ---
 

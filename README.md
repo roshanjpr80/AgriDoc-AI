@@ -123,9 +123,29 @@ curl -X POST http://localhost:9998/agripulse \
 - Free tier for backend API
 - Free custom domains
 
-### Option 3: Railway.app / Vercel
-- Simple drag-and-drop deployment
-- Automatic HTTPS
+### Option 2: Vercel (Recommended for Static Frontend)
+- Free Serverless Functions for backend API
+- Free Static Site Hosting for frontend
+- Global CDN, automatic HTTPS
+- Drag-and-drop or CLI deployment
+
+#### Quick Vercel Deployment:
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Generate production secrets first
+python -c "import secrets; from cryptography.fernet import Fernet; print(f'API_KEY=agridoc-{secrets.token_urlsafe(32)}'); print(f'DB_KEY={Fernet.generate_key().decode()}')"
+
+# Build frontend
+cd frontend && npm install && npm run build
+
+# Deploy frontend (from project root)
+vercel
+
+# Deploy backend (if needed as API routes)
+# See DEPLOYMENT.md for full Vercel setup
+```
 
 ### Quick Deploy Command:
 ```bash
