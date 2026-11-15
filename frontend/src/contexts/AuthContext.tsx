@@ -13,7 +13,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Default API key from environment (for development)
 const DEFAULT_API_KEY = (import.meta as any).env?.VITE_API_KEY || '';
-const DEFAULT_API_BASE = (import.meta as any).env?.VITE_API_BASE || '/api';
+const DEFAULT_API_BASE = (import.meta as any).env?.VITE_API_BASE || 'https://agridoc-ai-backend.onrender.com';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [apiKey, setApiKeyState] = useState<string>(() => {
