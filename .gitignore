@@ -113,11 +113,10 @@ dmypy.json
 *.sqlite3
 
 
-# Model Artifacts (CRITICAL: Large binary files)
-
+# Model Artifacts (Git LFS)
 models/artifacts/*.onnx
+!models/artifacts/agridoc_cv.onnx
 models/artifacts/*.json
-models/artifacts/*.onnx.json
 models/artifacts/metadata.json
 models/checkpoints/*.pt
 
