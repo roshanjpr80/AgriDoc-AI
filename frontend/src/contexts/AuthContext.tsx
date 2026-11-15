@@ -25,7 +25,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const [apiBase, setApiBaseState] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('agridoc_api_base') || DEFAULT_API_BASE;
+      const stored = localStorage.getItem('agridoc_api_base');
+      // Only use stored value if it's a valid https URL (production-safe)
+      // Ignore relative paths (/api), localhost, or other dev settings
+      if (stored && (stored.startsWith('https://') || stored.startsWith('http://'))) {
+        return stored;
+      }
+      return DEFAULT_API_BASE;
     }
     return DEFAULT_API_BASE;
   });
