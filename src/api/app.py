@@ -164,7 +164,15 @@ def _check_api_key(request: Request) -> None:
         raise HTTPException(status_code=401, detail="unauthorised")
 
 def _rate_limit(request: Request) -> None:
-    ip = request.client.host if request.client else "unknown"
+    # Use X-Forwarded-For header for real client IP behind proxies (Render, Cloudflare, etc.)
+    # Fall back to request.client.host if header not present
+    forwarded_for = request.headers.get("x-forwarded-for")
+    if forwarded_for:
+        # X-Forwarded-For can contain multiple IPs: "client, proxy1, proxy2"
+        # The first one is the original client
+        ip = forwarded_for.split(",")[0].strip()
+    else:
+        ip = request.client.host if request.client else "unknown"
     now = time.time()
     window = _RATE[ip]
     window[:] = [t for t in window if now - t < 60]
@@ -185,6 +193,12 @@ _SECURITY_HEADERS = {
 async def _security_mw(request: Request, call_next):
     request_id = str(uuid.uuid4())[:8]
     t0 = time.perf_counter()
+    # Extract real client IP for logging and rate limiting (handles proxies)
+    forwarded_for = request.headers.get("x-forwarded-for")
+    if forwarded_for:
+        client_ip = forwarded_for.split(",")[0].strip()
+    else:
+        client_ip = request.client.host if request.client else "unknown"
     # Skip auth for liveness/readiness probes and OpenAPI docs.
     # /docs and /redoc are dev-only — they are not served in production
     # deployments (docs_url=None) and are safe to leave unauthenticated
@@ -196,8 +210,8 @@ async def _security_mw(request: Request, call_next):
         return await call_next(request)
     # Log every request
     logger.info(
-        f"{request.method} {request.url.path} {request.client.host if request.client else '-'}",
-        extra={"request_id": request_id, "http_method": request.method, "path": request.url.path, "client_host": request.client.host if request.client else "-"},
+        f"{request.method} {request.url.path} {client_ip}",
+        extra={"request_id": request_id, "http_method": request.method, "path": request.url.path, "client_host": client_ip},
     )
     try:
         _check_api_key(request)
@@ -220,8 +234,8 @@ async def _security_mw(request: Request, call_next):
     response = await call_next(request)
     elapsed_ms = (time.perf_counter() - t0) * 1000
     logger.info(
-        f"request-response: {request.method} {request.url.path} -> {response.status_code} ({elapsed_ms:.0f}ms)",
-        extra={"request_id": request_id, "http_method": request.method, "path": request.url.path, "status_code": response.status_code, "elapsed_ms": elapsed_ms},
+        f"request-response: {request.method} {request.url.path} {client_ip} -> {response.status_code} ({elapsed_ms:.0f}ms)",
+        extra={"request_id": request_id, "http_method": request.method, "path": request.url.path, "client_host": client_ip, "status_code": response.status_code, "elapsed_ms": elapsed_ms},
     )
     # Add request ID to response headers
     response.headers["x-request-id"] = request_id
