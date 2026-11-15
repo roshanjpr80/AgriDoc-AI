@@ -227,6 +227,13 @@ async def _security_mw(request: Request, call_next):
     response.headers["x-request-id"] = request_id
     for header, value in _SECURITY_HEADERS.items():
         response.headers[header] = value
+    # Add CORS headers for allowed origins
+    origin = request.headers.get("origin")
+    if origin in _ALLOWED_ORIGINS:
+        response.headers["access-control-allow-origin"] = origin
+        response.headers["access-control-allow-credentials"] = "true"
+    # Store headers before gzip compression
+    response_headers = dict(response.headers)
     # Gzip compression for JSON responses
     accept_encoding = request.headers.get("accept-encoding", "")
     if "gzip" in accept_encoding and "application/json" in response.headers.get("content-type", ""):
@@ -237,6 +244,9 @@ async def _security_mw(request: Request, call_next):
         response = Response(content=buf.getvalue(), status_code=response.status_code)
         response.headers["content-encoding"] = "gzip"
         response.headers["content-type"] = "application/json"
+        # Restore CORS, security, and id headers after gzip
+        for header, value in response_headers.items():
+            response.headers[header] = value
     return response
 @app.get("/health")
 async def health():
