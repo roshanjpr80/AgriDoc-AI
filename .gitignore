@@ -48,10 +48,10 @@ venv-scripts/
 .env
 .env.local
 .env.*.local
-*.env
 .env.production
 .env.development
 .env.test
+# .env.example is tracked as a template - do NOT use *.env pattern
 
 
 # IDE / Editor
@@ -205,8 +205,6 @@ node_modules/
 .node-gyp/
 .atom/
 .bash_history
-.env
-.env.*
 .npm
 .cache/
 
