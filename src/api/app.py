@@ -245,8 +245,10 @@ async def _security_mw(request: Request, call_next):
         response.headers["content-encoding"] = "gzip"
         response.headers["content-type"] = "application/json"
         # Restore CORS, security, and id headers after gzip
+        # Exclude Content-Length since compressed size differs from original
         for header, value in response_headers.items():
-            response.headers[header] = value
+            if header.lower() != "content-length":
+                response.headers[header] = value
     return response
 @app.get("/health")
 async def health():
