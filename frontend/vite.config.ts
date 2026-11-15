@@ -54,14 +54,14 @@ export default defineConfig({
             short_name: 'Diagnose',
             description: 'Take a photo for instant AI diagnosis',
             url: '/camera',
-            icons: [{ src: 'camera-icon.png', sizes: '192x192' }]
+            icons: [{ src: 'camera-icon.svg', sizes: '192x192' }]
           },
           {
             name: 'Expert Chat',
             short_name: 'Chat',
             description: 'Ask crop health questions',
             url: '/chat',
-            icons: [{ src: 'chat-icon.png', sizes: '192x192' }]
+            icons: [{ src: 'chat-icon.svg', sizes: '192x192' }]
           }
         ]
       },
