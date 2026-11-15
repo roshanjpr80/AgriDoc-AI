@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import io
 import json
+import sys
 from pathlib import Path
 from typing import List, Tuple
 
@@ -31,10 +32,50 @@ _session = None
 _LABELS: List[str] = []
 
 
+def _ensure_model_available():
+    """Download model from HuggingFace if not present locally."""
+    if _model_path.exists():
+        return True
+
+    # Try downloading from HuggingFace
+    hf_url = "https://huggingface.co/roshanjpr80/agridoc-model/resolve/main/agridoc_cv.onnx"
+    print(f"[AgriDoc] Downloading model from {hf_url}...")
+
+    try:
+        import requests
+        response = requests.get(hf_url, timeout=120, stream=True)
+        response.raise_for_status()
+        _model_path.parent.mkdir(parents=True, exist_ok=True)
+
+        total_size = int(response.headers.get('content-length', 0))
+        downloaded = 0
+
+        with open(_model_path, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+                    downloaded += len(chunk)
+
+        print(f"[AgriDoc] Model downloaded: {_model_path.stat().st_size / 1024:.1f} KB")
+        return True
+    except Exception as e:
+        print(f"[AgriDoc] ERROR: Could not download model: {e}")
+        return False
+
+
 def _load():
     global _session, _LABELS
     if _session is not None:
         return
+
+    # Ensure model exists
+    if not _ensure_model_available():
+        raise RuntimeError(
+            f"Model not found at {_model_path} and could not download from HuggingFace.\n"
+            "Run: python scripts/download_model.py\n"
+            "Or upload the model to https://huggingface.co/ and provide URL."
+        )
+
     import onnxruntime as ort
     _session = ort.InferenceSession(str(_model_path), providers=["CPUExecutionProvider"])
     if _labels_path.exists():

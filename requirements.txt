@@ -28,6 +28,7 @@ httpx-sse==0.4.3               # SSE streaming for the AgriPulse workflow
 pyttsx3==2.99                  # offline TTS fallback (sr/advice/tts.py)
 argon2-cffi==25.1.0            # password hashing for security
 cryptography==50.0.2           # Fernet encryption of stored data
+requests==2.31.0                # HTTP client for model downloads from HuggingFace
 
 # Database layer (imported by src/api/app.py via backend):
 sqlalchemy==2.1.6              # database ORM
