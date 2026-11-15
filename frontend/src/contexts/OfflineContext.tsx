@@ -101,6 +101,7 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
 
     const now = Date.now();
     const ttlMs = QUEUE_TTL_HOURS * 60 * 60 * 1000;
+    console.log('[offline] queuePredictions start, items:', predictions.length, 'now:', now);
 
     for (const pred of predictions) {
       const id = crypto.randomUUID();
