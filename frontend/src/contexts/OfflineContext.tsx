@@ -52,7 +52,7 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 4000);
-      const response = await fetch('/api/health', { signal: controller.signal });
+      const response = await fetch(`${localStorage.getItem('agridoc_api_base') || window.location.origin}/health`, { signal: controller.signal });
       clearTimeout(timeoutId);
       setIsOnline(response.ok);
     } catch {
@@ -115,21 +115,33 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
       const itemToStore = { ...item, imageBase64: base64 };
       delete (itemToStore as any).imageBlob;
 
-      store.put(itemToStore);
+      await new Promise<void>((resolve, reject) => {
+        const req = store.put(itemToStore);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
     }
 
     // Clean old entries
     const index = store.index('timestamp');
     const cutoff = now - ttlMs;
     const range = IDBKeyRange.upperBound(cutoff);
-    const deleteRequest = index.openCursor(range);
-    deleteRequest.onsuccess = (event) => {
-      const cursor = (event.target as IDBRequest).result;
-      if (cursor) {
-        cursor.delete();
-        cursor.continue();
-      }
-    };
+
+    await new Promise<void>((resolve, reject) => {
+      const deleteRequest = index.openCursor(range);
+      let errored = false;
+      deleteRequest.onerror = () => {
+        if (!errored) { errored = true; reject(deleteRequest.error); }
+      };
+      deleteRequest.onsuccess = (event) => {
+        const cursor = (event.target as IDBRequest).result;
+        if (cursor) {
+          cursor.delete().onsuccess = () => cursor.continue();
+        } else {
+          resolve();
+        }
+      };
+    });
 
     await new Promise<void>((resolve, reject) => {
       tx.oncomplete = () => resolve();
