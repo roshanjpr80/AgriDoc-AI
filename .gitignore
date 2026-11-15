@@ -126,6 +126,7 @@ models/checkpoints/*.pt
 data/plantvillage/
 data/offline/
 data/splits/**/*.json
+!data/splits/classes.json
 data/knowledge/*.json
 data/knowledge/*.yaml
 
