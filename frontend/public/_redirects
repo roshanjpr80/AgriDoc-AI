@@ -1,0 +1,12 @@
+# AgriDoc AI — Redirect API requests to backend for Render static deployment
+/api/*	https://agridoc-ai-backend.onrender.com/api/:splat	200
+/health	https://agridoc-ai-backend.onrender.com/health	200
+/ready	https://agridoc-ai-backend.onrender.com/ready	200
+/classes	https://agridoc-ai-backend.onrender.com/classes	200
+/predict	https://agridoc-ai-backend.onrender.com/predict	200
+/advice	https://agridoc-ai-backend.onrender.com/advice	200
+/rag	https://agridoc-ai-backend.onrender.com/rag	200
+/agripulse	https://agridoc-ai-backend.onrender.com/agripulse	200
+/feedback	https://agridoc-ai-backend.onrender.com/feedback	200
+/sync	https://agridoc-ai-backend.onrender.com/sync	200
+/data	https://agridoc-ai-backend.onrender.com/data	200
