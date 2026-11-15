@@ -17,14 +17,15 @@ def ensure_model_exists():
 
     # Check if model already exists
     if model_path.exists():
-        print(f"✅ Model already exists: {model_path} ({model_path.stat().st_size / 1024:.1f} KB)")
+        size_kb = model_path.stat().st_size / 1024
+        print(f"[OK] Model already exists: {model_path} ({size_kb:.1f} KB)")
         return True
 
     # Model doesn't exist - try to download from HuggingFace
     hf_url = "https://huggingface.co/roshanjpr80/agridoc-model/resolve/main/agridoc_cv.onnx"
 
-    print(f"📥 Downloading model from: {hf_url}")
-    print(f"   This may take 30-60 seconds...")
+    print(f"[INFO] Downloading model from: {hf_url}")
+    print("   This may take 30-60 seconds...")
 
     try:
         import requests
@@ -45,13 +46,15 @@ def ensure_model_exists():
                     downloaded += len(chunk)
                     if total_size > 0:
                         percent = downloaded * 100 // total_size
-                        print(f"\r   Progress: {percent}% ({downloaded / 1024 / 1024:.2f} MB)", end='')
+            sys.stderr.write(f"\r   Progress: {percent}% ({downloaded / 1024 / 1024:.2f} MB)")
+            sys.stderr.flush()
 
-        print(f"\n✅ Model downloaded successfully: {model_path} ({downloaded / 1024:.1f} KB)")
+        print()
+        print(f"[OK] Model downloaded successfully: {model_path} ({downloaded / 1024:.1f} KB)")
         return True
 
     except Exception as e:
-        print(f"❌ Failed to download model: {e}")
+        print(f"[ERROR] Failed to download model: {e}")
         return False
 
 

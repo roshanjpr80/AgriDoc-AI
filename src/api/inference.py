@@ -56,10 +56,10 @@ def _ensure_model_available():
                     f.write(chunk)
                     downloaded += len(chunk)
 
-        print(f"[AgriDoc] Model downloaded: {_model_path.stat().st_size / 1024:.1f} KB")
+        print(f"[OK] Model downloaded: {_model_path.stat().st_size / 1024:.1f} KB")
         return True
     except Exception as e:
-        print(f"[AgriDoc] ERROR: Could not download model: {e}")
+        print(f"[ERROR] Could not download model: {e}")
         return False
 
 
