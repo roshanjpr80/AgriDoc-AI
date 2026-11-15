@@ -128,7 +128,8 @@ data/offline/
 data/splits/**/*.json
 !data/splits/classes.json
 data/knowledge/*.json
-data/knowledge/*.yaml
+!data/knowledge/advisory_rules.json
+!data/knowledge/translations.json
 
 
 # Frontend Build Artifacts
