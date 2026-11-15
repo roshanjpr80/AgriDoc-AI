@@ -165,3 +165,5 @@ function App() {
 }
 
 export default App;
+// v2.1.0-fix IndexedDB transaction timeout 2026-11-15
+// CACHE_BUST_V2 1794731810
