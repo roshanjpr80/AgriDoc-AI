@@ -22,7 +22,7 @@ def ensure_model_exists():
         return True
 
     # Model doesn't exist - try to download from HuggingFace
-    hf_url = "https://huggingface.co/roshanjpr80/agridoc-model/resolve/main/agridoc_cv.onnx"
+    hf_url = "https://huggingface.co/roshanjpr80/agridoc-model/blob/main/agridoc_cv.onnx"
 
     print(f"[INFO] Downloading model from: {hf_url}")
     print("   This may take 30-60 seconds...")

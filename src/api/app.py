@@ -46,6 +46,7 @@ handler.setLevel(logging.DEBUG)
 handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
 logger.addHandler(handler)
 from src.advice.engine import build_advice, answer_free_text
+from src.advice import knowledge as kb_module
 
 # Sanitize class labels and text inputs
 _LABEL_RE = re.compile(r'^[A-Za-z0-9_\-]+$', re.ASCII)
@@ -106,22 +107,26 @@ def _get_advice_data():
     return _advice_data
 
 def _get_all_classes():
-    """Get all supported classes from advice data."""
-    advice_data = _get_advice_data()
-    all_classes = []
+    """Get all supported classes from knowledge base or fallback."""
+    try:
+        # Try knowledge base first (preferred source)
+        return sorted(kb_module.all_classes())
+    except Exception:
+        pass
 
-    # Add supported crops
-    all_classes.extend(advice_data.get("supported_crops", []))
+    # Fallback: use classes.json
+    try:
+        classes_path = PKG_ROOT / "data" / "splits" / "classes.json"
+        if classes_path.exists():
+            return json.loads(classes_path.read_text(encoding="utf-8"))
+    except Exception:
+        pass
 
-    # Add disease classes from rules
-    for rule in advice_data.get("rules", []):
-        all_classes.append(rule.get("class", ""))
-
-    # Add common healthy class if not already present
-    if "Healthy" not in all_classes:
-        all_classes.append("Healthy")
-
-    return all_classes
+    # Last resort: stub data (should never reach in production)
+    return [
+        "Apple___Apple_scab", "Apple___Black_rot", "Apple___Cedar_apple_rust",
+        "Tomato___Early_blight", "Tomato___Late_blight", "Tomato___healthy",
+    ]
 
 app = FastAPI(title="AgriDoc AI", version="1.0.0", docs_url="/docs", redoc_url="/redoc")
 
